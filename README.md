@@ -9,12 +9,27 @@ this account's older X11/bspwm setup,
 (rofi/sxhkd behaviors rewritten for wofi/sway, since bspwm+rofi are X11-only
 and this is a Wayland setup).
 
-- **Theme:** Catppuccin Mocha by default, click the paint-brush icon in waybar to cycle through Catppuccin Mocha / Gruvbox Dark / Nord / Dracula.
+- **Theme:** Catppuccin Mocha / Gruvbox Dark / Nord / Dracula, cycle with `$mod+Shift+t` or the paint-brush icon in waybar.
 - **Font:** [Agave Nerd Font](https://github.com/ryanoasis/nerd-fonts).
+- **Icon theme / GTK theme:** BigSur-dark icons + Orchis-dark GTK theme (ported from adithya-r-prabhu/dotfiles' `.icons`/`.themes`), set for both GTK3 (`gtk-3.0/settings.ini`) and GTK4/libadwaita apps (`gsettings` -- see `setup_gtk_theme()` in install.sh). Alternates also included: BigSur (light), Orchis-dark-compact, Yaru-dark.
+- **Wallpapers:** Pranav's originals plus extras from adithya-r-prabhu/arch-xfce-dotfiles, all pickable via `$mod+Shift+p` or waybar's wallpaper icon.
 - **Terminals:** [kitty](https://sw.kovidgoyal.net/kitty/) (primary, `$mod+Return`) and [foot](https://codeberg.org/dnkl/foot) (secondary/lightweight, `$mod+Shift+Return`).
 - **Browser:** Microsoft Edge (`$mod+Shift+w`, assigned to workspace 2).
 - **File manager:** Nautilus (`$mod+n`).
-- **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), flameshot (screenshot GUI, `Alt+s`), fastfetch, neovim, tmux, htop.
+- **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), flameshot (screenshot GUI, `Alt+s`), blueman (Bluetooth), cliphist (clipboard history), fastfetch, neovim, tmux, htop.
+
+### Why no nitrogen?
+
+[nitrogen](https://github.com/l3ib/nitrogen) (used for wallpapers in the old
+X11 `bspwm` setup) is an **X11-only** tool -- it fundamentally cannot run on
+Wayland/Sway. Its job here is done natively instead by `swaybg` (sets the
+wallpaper, started automatically by sway's `output * bg ...` config line)
+plus the wofi-based `wallpaper-picker.sh` (lets you pick one interactively
+and persists the choice to the sway config) -- same end result, Wayland-native
+tooling. Same story for anything else from the old X11 setups that doesn't
+appear here (`picom`, `nitrogen`, `polybar`, `rofi`, `dunst`, `sxhkd`): they're
+all X11-specific and have Wayland-native equivalents already in this repo
+(sway's own compositing, swaybg, waybar, wofi, mako, sway's `bindsym`).
 
 ## Usage
 
@@ -61,21 +76,78 @@ On a machine with the proprietary NVIDIA driver, two separate problems show up:
    so a future `sway` package upgrade can silently reset it -- re-run
    `./install.sh --packages` if Sway stops launching after an update.
 
-## Extra keybindings (beyond Pranav's base set)
+## Keybindings
 
+`$mod` = Super/Windows key. Full source of truth is
+`sway/.config/sway/config` (also viewable live with `$mod+F1`).
+
+**Apps / basics**
 | Binding | Action |
 |---|---|
-| `$mod+Shift+Return` | Open foot (secondary terminal) |
+| `$mod+Return` | Open kitty (terminal) |
+| `$mod+Shift+Return` | Open foot (lightweight secondary terminal) |
+| `$mod+d` | App launcher (wofi) |
 | `$mod+Shift+w` | Open Microsoft Edge |
 | `$mod+n` | Open Nautilus (file manager) |
-| `$mod+Shift+e` | Power menu (lock/logout/suspend/reboot/shutdown) |
+| `$mod+Shift+q` | Close focused window |
+| `$mod+l` / `$mod+Escape` / `$mod+Ctrl+l` | Lock screen |
+| `$mod+Shift+e` | Power menu (lock/logout/suspend/restart/shutdown) |
 | `$mod+F1` | Keybinding cheat-sheet |
 | `$mod+Ctrl+e` | Emoji picker (copies to clipboard) |
-| `Alt+s` | Screenshot GUI (flameshot) |
+| `$mod+Shift+c` | Reload sway config |
 
-See `sway/.config/sway/config` for the full list (workspaces, moving/resizing
-windows, media/brightness keys, screenshots via grim+slurp, etc. -- all
-inherited from Pranav's base config).
+**"Connecting" (network / Bluetooth) -- new**
+| Binding | Action |
+|---|---|
+| `$mod+Shift+n` | Network menu: Wi-Fi scan/connect/disconnect, ethernet toggle |
+| `$mod+Shift+b` | Bluetooth manager (blueman-manager: pair/connect/trust devices) |
+
+**Look & feel -- new**
+| Binding | Action |
+|---|---|
+| `$mod+Shift+t` | Cycle color theme (Catppuccin/Gruvbox/Nord/Dracula) |
+| `$mod+Shift+p` | Wallpaper picker (thumbnails from `wallpapers/`) |
+| `$mod+Shift+m` | Monitor layout tool (wdisplays) |
+
+**Clipboard & screenshots**
+| Binding | Action |
+|---|---|
+| `$mod+Ctrl+v` | Clipboard history (cliphist) -- new |
+| `Alt+s` | Screenshot GUI (flameshot) |
+| `Print` | Full screenshot to `~/Pictures/Screenshots/` |
+| `$mod+Shift+s` | Screenshot a selected region to clipboard (grim+slurp) |
+
+**Media / brightness keys** (all show a mako popup now -- new)
+| Binding | Action |
+|---|---|
+| `XF86AudioRaiseVolume` / `LowerVolume` / `Mute` | Volume up/down/mute |
+| `XF86AudioMicMute` | Mic mute toggle |
+| `XF86MonBrightnessUp` / `Down` | Brightness up/down |
+
+**Moving around** (vim-style `h/j/k/l` = left/down/up/right, plus arrow keys)
+| Binding | Action |
+|---|---|
+| `$mod+h/j/k/l` or arrows | Move focus |
+| `$mod+Shift+h/j/k/l` or `Shift+`arrows | Move focused window |
+| `$mod+1`..`$mod+0` | Switch to workspace 1-10 |
+| `$mod+Shift+1`..`0` | Move window to workspace 1-10 |
+
+**Layout**
+| Binding | Action |
+|---|---|
+| `$mod+b` / `$mod+v` | Split horizontally / vertically |
+| `$mod+s` / `$mod+w` | Stacking / tabbed layout |
+| `$mod+e` | Toggle split layout |
+| `$mod+f` | Fullscreen |
+| `$mod+Shift+space` | Toggle floating |
+| `$mod+space` | Toggle focus between tiling/floating |
+| `$mod+a` | Focus parent container |
+| `$mod+r` | Resize mode (then arrows/hjkl, Return/Escape to exit) |
+| `$mod+minus` / `$mod+Shift+minus` | Show/send to scratchpad |
+
+Since `$mod+w` and `$mod+e` are sway's own layout commands, the
+bspwm-inherited browser/file-manager bindings live on `$mod+Shift+w` and
+`$mod+n` instead (see table above) to avoid clobbering them.
 
 ## Structure
 
