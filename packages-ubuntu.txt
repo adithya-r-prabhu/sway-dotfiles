@@ -1,0 +1,35 @@
+brightnessctl
+curl
+fd-find
+flameshot
+foot
+fzf
+grim
+htop
+kitty
+mako-notifier
+nautilus
+neovim
+pavucontrol
+playerctl
+ripgrep
+slurp
+stow
+swaybg
+swayidle
+swaylock
+sway
+tmux
+tree
+unzip
+waybar
+wget
+wl-clipboard
+wofi
+wpasupplicant
+xdg-desktop-portal-wlr
+
+# NOT in this list, installed separately by install.sh:
+#   fastfetch          -- not packaged in Ubuntu 24.04 repos; installed from
+#                          the fastfetch-cli/fastfetch GitHub release .deb
+#   microsoft-edge-stable -- installed via Microsoft's own apt repo

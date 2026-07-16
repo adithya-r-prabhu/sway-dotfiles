@@ -1,0 +1,121 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 32,
+    "spacing": 4,
+    "margin-top": 8,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left": ["sway/workspaces", "sway/mode", "sway/window"],
+    "modules-center": ["mpris", "clock#time", "clock#date", "custom/snip"],
+    "modules-right": ["custom/theme", "custom/settings", "idle_inhibitor", "pulseaudio", "network", "backlight", "battery", "custom/monitors", "custom/power", "tray"],
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "format": "{name}"
+    },
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "sway/window": {
+        "format": "{title}",
+        "max-length": 60
+    },
+    "mpris": {
+        "format": "  {dynamic}",
+        "format-paused": "  {dynamic}",
+        "format-stopped": "  stopped",
+        "dynamic-order": ["title", "artist"],
+        "dynamic-separator": " - ",
+        "title-len": 25,
+        "artist-len": 20,
+        "max-length": 40,
+        "tooltip-format": "{player} : {dynamic}"
+    },
+    "clock#time": {
+        "format": "{:%H:%M}",
+        "format-alt": "{:%H:%M:%S}",
+        "tooltip": false
+    },
+    "clock#date": {
+        "format": "{:%a %d %b}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><big>{calendar}</big></tt>",
+        "calendar": {
+            "mode": "month",
+            "on-scroll": 1
+        },
+        "actions": {
+            "on-click-right": "mode",
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
+    },
+    "custom/snip": {
+        "format": "",
+        "tooltip-format": "Snip screenshot to clipboard",
+        "on-click": "grim -g \"$(slurp)\" - | wl-copy"
+    },
+    "custom/theme": {
+        "exec": "cat ~/.cache/waybar-theme 2>/dev/null || echo catppuccin-mocha",
+        "interval": 2,
+        "format": "  {}",
+        "tooltip-format": "Click to cycle color theme",
+        "on-click": "~/.config/waybar/scripts/cycle-theme.py"
+    },
+    "custom/settings": {
+        "format": "",
+        "tooltip-format": "Change wallpaper",
+        "on-click": "~/.config/waybar/scripts/wallpaper-picker.sh"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "tooltip-format-activated": "Stay-awake mode on (click to allow sleep)",
+        "tooltip-format-deactivated": "Stay-awake mode off (click to keep awake)",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "backlight": {
+        "format": "{icon}  {percent}%",
+        "format-icons": ["", ""]
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon}  {capacity}%",
+        "format-charging": "  {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "network": {
+        "format-wifi": "  {signalStrength}%",
+        "format-ethernet": "  {ifname}",
+        "format-disconnected": "  disconnected",
+        "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
+        "on-click": "~/.config/waybar/scripts/networkmenu.sh"
+    },
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "format-muted": "  muted",
+        "format-icons": {
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+    "custom/monitors": {
+        "format": "",
+        "tooltip-format": "Manage monitors (wdisplays)",
+        "on-click": "wdisplays"
+    },
+    "custom/power": {
+        "format": "",
+        "tooltip-format": "Power menu: lock / logout / restart / shutdown",
+        "on-click": "~/.config/waybar/scripts/powermenu.sh"
+    },
+    "tray": {
+        "spacing": 10
+    }
+}
