@@ -1,4 +1,6 @@
 brightnessctl
+blueman
+cliphist
 curl
 fd-find
 flameshot

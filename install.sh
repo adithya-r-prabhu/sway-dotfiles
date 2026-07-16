@@ -17,7 +17,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGES=(kitty foot mako sway swaylock waybar wofi)
+PACKAGES=(kitty foot mako sway swaylock waybar wofi gtk)
 FONT_DIR="$HOME/.local/share/fonts/Agave"
 BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d%H%M%S)"
 # Stale from an earlier version of this script -- see cleanup_stale_nvidia_modeset()
@@ -103,6 +103,29 @@ setup_default_apps() {
     fi
 }
 
+setup_gtk_theme() {
+    # gtk-3.0/settings.ini (stowed by the "gtk" package) covers classic GTK3
+    # apps, but GTK4/libadwaita apps (e.g. Nautilus 46+) mostly ignore custom
+    # widget themes and instead read these via gsettings/dconf -- icon theme
+    # is still respected there even though libadwaita ignores gtk-theme-name.
+    if ! command -v gsettings >/dev/null; then
+        echo "==> gsettings not found, skipping GTK icon-theme/dark-mode setup" >&2
+        return
+    fi
+    echo "==> Setting icon theme (BigSur-dark) + dark color-scheme via gsettings"
+    gsettings set org.gnome.desktop.interface icon-theme 'BigSur-dark' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme 'Orchis-dark' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+}
+
+enable_bluetooth() {
+    if ! command -v systemctl >/dev/null; then
+        return
+    fi
+    echo "==> Enabling bluetooth.service (for the Super+Shift+B / blueman-manager keybinding)"
+    sudo systemctl enable --now bluetooth.service 2>/dev/null || true
+}
+
 cleanup_stale_nvidia_modeset() {
     # An earlier version of this script disabled nvidia-drm's modeset
     # (`options nvidia-drm modeset=0`), copied from npranav7619/dotfiles
@@ -159,10 +182,32 @@ configure_sway_session() {
 stow_packages() {
     echo "==> Linking dotfiles with stow"
     for pkg in "${PACKAGES[@]}"; do
-        for path in "$DOTFILES_DIR/$pkg/.config/"*; do
+        # Back up real (non-symlink) pre-existing files that would conflict
+        # with stow. Checked in two places: one level inside .config/ (since
+        # ~/.config itself is a real shared directory across all packages,
+        # not something to move wholesale) and any other top-level dotfile/
+        # dir the package ships directly under $HOME (e.g. gtk's .icons/.themes).
+        if [ -d "$DOTFILES_DIR/$pkg/.config" ]; then
+            for path in "$DOTFILES_DIR/$pkg/.config/"*; do
+                [ -e "$path" ] || continue
+                local name target
+                name="$(basename "$path")"
+                target="$HOME/.config/$name"
+                if [ -e "$target" ] && [ ! -L "$target" ]; then
+                    echo "    backing up existing $target -> $BACKUP_DIR/"
+                    mkdir -p "$BACKUP_DIR"
+                    mv "$target" "$BACKUP_DIR/"
+                fi
+            done
+        fi
+        for path in "$DOTFILES_DIR/$pkg/".*; do
+            [ -e "$path" ] || continue
             local name target
             name="$(basename "$path")"
-            target="$HOME/.config/$name"
+            case "$name" in
+                .|..|.config) continue ;;
+            esac
+            target="$HOME/$name"
             if [ -e "$target" ] && [ ! -L "$target" ]; then
                 echo "    backing up existing $target -> $BACKUP_DIR/"
                 mkdir -p "$BACKUP_DIR"
@@ -182,6 +227,8 @@ main() {
         install_fastfetch
         install_microsoft_edge
         setup_default_apps
+        setup_gtk_theme
+        enable_bluetooth
         cleanup_stale_nvidia_modeset
         configure_sway_session
     fi
