@@ -37,16 +37,29 @@ needed:
 ./install.sh --packages
 ```
 
-### Hybrid NVIDIA laptops/desktops: sway refuses to start
+### NVIDIA machines: Sway missing from the login screen, or won't start
 
-On a hybrid-GPU machine (NVIDIA + Intel/AMD) with the proprietary NVIDIA
-driver, sway (wlroots) refuses to start at all -- it hard-exits with
-`Proprietary Nvidia drivers are NOT supported`. `./install.sh --packages`
-detects this via `lspci` and disables `nvidia-drm`'s modeset capability
-(`/etc/modprobe.d/zzz-nvidia-drm-nomodeset.conf`), so Intel/AMD always drives
-the display and NVIDIA stays available for compute/CUDA only. **Takes effect
-on next reboot.** This is a no-op on non-hybrid systems and skips itself if
-already applied.
+On a machine with the proprietary NVIDIA driver, two separate problems show up:
+
+1. **"Sway" doesn't appear as a session option at all** (behind GDM's
+   gear/settings icon). Ubuntu's GDM has a udev rule
+   (`/usr/lib/udev/rules.d/61-gdm.rules`) that disables Wayland *entirely*
+   whenever `nvidia-drm`'s `modeset` parameter is off -- **except** on
+   detected hybrid-GPU *laptops*, which it leaves alone. On a desktop (no
+   internal panel), disabling modeset -- e.g. via the common
+   `options nvidia-drm modeset=0` fix for hybrid-laptop black-screen-at-boot
+   issues -- backfires and hides every Wayland session. `./install.sh
+   --packages` removes any such stale modeset override
+   (`cleanup_stale_nvidia_modeset`) so GDM keeps Wayland/Sway listed
+   (**takes effect on next reboot**).
+2. **Sway exits immediately with `Proprietary Nvidia drivers are NOT
+   supported`** if you do select it. This check is independent of modeset --
+   it fires whenever any proprietary NVIDIA driver is loaded at all. The fix
+   is the `--unsupported-gpu` flag, which `./install.sh --packages` bakes
+   into `/usr/share/wayland-sessions/sway.desktop`'s `Exec=` line
+   (`configure_sway_session`). Note that file isn't a tracked dpkg conffile,
+   so a future `sway` package upgrade can silently reset it -- re-run
+   `./install.sh --packages` if Sway stops launching after an update.
 
 ## Extra keybindings (beyond Pranav's base set)
 
