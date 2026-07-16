@@ -16,7 +16,19 @@ and this is a Wayland setup).
 - **Terminals:** [kitty](https://sw.kovidgoyal.net/kitty/) (primary, `$mod+Return`) and [foot](https://codeberg.org/dnkl/foot) (secondary/lightweight, `$mod+Shift+Return`).
 - **Browser:** Microsoft Edge (`$mod+Shift+w`, assigned to workspace 2).
 - **File manager:** Nautilus (`$mod+n`).
-- **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), flameshot (screenshot GUI, `Alt+s`), blueman (Bluetooth), cliphist (clipboard history), fastfetch, neovim, tmux, htop.
+- **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), blueman (Bluetooth), CopyQ (clipboard history), fastfetch, neovim, tmux, htop.
+
+### Why no flameshot?
+
+flameshot is installed by neither this repo nor the bspwm one anymore -- it
+was tried and dropped. Its Qt5 GUI has no `wlr-layer-shell` support, so on
+this sway/wlroots setup it launches (no crash, no error) but renders
+**nothing visible at all** -- confirmed by screenshotting mid-launch and
+seeing an unchanged desktop. This is a known flameshot-on-wlroots limitation,
+not a config issue. `Alt+s` now runs `screenshot-region.sh`
+(grim+slurp+wl-copy+a mako notification) instead -- same core
+"select a region, save it, copy it" behavior, fully Wayland-native and
+already proven to work reliably here.
 
 ### Why no nitrogen?
 
@@ -44,7 +56,7 @@ package's config into `~/.config` via `stow`. Any pre-existing real config
 files get moved to `~/.config-backup-<timestamp>/` first, so nothing is lost.
 
 To also install the full package list (sway ecosystem, kitty/foot, Nautilus,
-flameshot, fastfetch, dev tools), add the Microsoft Edge apt repo, set
+CopyQ, fastfetch, dev tools), add the Microsoft Edge apt repo, set
 default apps (browser/file manager), and apply the hybrid-NVIDIA fix if
 needed:
 
@@ -112,10 +124,19 @@ On a machine with the proprietary NVIDIA driver, two separate problems show up:
 **Clipboard & screenshots**
 | Binding | Action |
 |---|---|
-| `$mod+Ctrl+v` | Clipboard history (cliphist) -- new |
-| `Alt+s` | Screenshot GUI (flameshot) |
+| `$mod+Ctrl+v` | Clipboard history (CopyQ, toggle show/hide) -- new |
+| `Alt+s` | Screenshot a region, save to `~/Pictures/Screenshots/` + copy to clipboard (grim+slurp) -- new, replaces flameshot |
 | `Print` | Full screenshot to `~/Pictures/Screenshots/` |
-| `$mod+Shift+s` | Screenshot a selected region to clipboard (grim+slurp) |
+| `$mod+Shift+s` | Screenshot a selected region straight to clipboard only (grim+slurp) |
+
+CopyQ's window is forced floating, centered, and fixed-size (never tiles).
+**sway does not draw clickable close/minimize buttons on any window**
+(unlike GNOME/Windows) -- the titlebar is just a label. To dismiss CopyQ:
+press `$mod+Ctrl+v` again (same toggle), press `Escape` while it's focused
+(CopyQ's own default), click anywhere outside it (auto-closes after 500ms,
+`close_on_unfocus` is on by default), or `$mod+Shift+q` like any other
+window. It keeps running in the background/tray either way -- that's by
+design for a clipboard manager, not a bug.
 
 **Media / brightness keys** (all show a mako popup now -- new)
 | Binding | Action |

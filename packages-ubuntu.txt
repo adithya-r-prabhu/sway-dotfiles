@@ -1,9 +1,8 @@
 brightnessctl
 blueman
-cliphist
+copyq
 curl
 fd-find
-flameshot
 foot
 fzf
 grim
