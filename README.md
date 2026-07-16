@@ -1,4 +1,5 @@
 # sway-dotfiles
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/984096a5-798a-46c5-9a7e-1b1287449425" />
 
 Minimal Sway desktop, managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
