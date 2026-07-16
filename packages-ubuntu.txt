@@ -28,6 +28,7 @@ waybar
 wget
 wl-clipboard
 wofi
+wdisplays
 wpasupplicant
 xdg-desktop-portal-wlr
 
