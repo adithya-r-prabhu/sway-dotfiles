@@ -14,7 +14,7 @@ and this is a Wayland setup).
 - **Icon theme / GTK theme:** BigSur-dark icons + Orchis-dark GTK theme (ported from adithya-r-prabhu/dotfiles' `.icons`/`.themes`), set for both GTK3 (`gtk-3.0/settings.ini`) and GTK4/libadwaita apps (`gsettings` -- see `setup_gtk_theme()` in install.sh). Alternates also included: BigSur (light), Orchis-dark-compact, Yaru-dark.
 - **Wallpapers:** Pranav's originals plus extras from adithya-r-prabhu/arch-xfce-dotfiles, all pickable via `$mod+Shift+p` or waybar's wallpaper icon.
 - **Terminals:** [kitty](https://sw.kovidgoyal.net/kitty/) (primary, `$mod+Return`) and [foot](https://codeberg.org/dnkl/foot) (secondary/lightweight, `$mod+Shift+Return`).
-- **Browser:** Microsoft Edge (`$mod+Shift+w`, assigned to workspace 2).
+- **Browser:** Microsoft Edge (`$mod+w`, assigned to workspace 2).
 - **File manager:** Nautilus (`$mod+n`).
 - **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), blueman (Bluetooth), CopyQ (clipboard history), fastfetch, neovim, tmux, htop.
 
@@ -99,9 +99,9 @@ On a machine with the proprietary NVIDIA driver, two separate problems show up:
 | `$mod+Return` | Open kitty (terminal) |
 | `$mod+Shift+Return` | Open foot (lightweight secondary terminal) |
 | `$mod+d` | App launcher (wofi) |
-| `$mod+Shift+w` | Open Microsoft Edge |
+| `$mod+w` | Open Microsoft Edge |
 | `$mod+n` | Open Nautilus (file manager) |
-| `$mod+Shift+q` | Close focused window |
+| `$mod+q` / `$mod+Shift+q` | Close focused window |
 | `$mod+l` / `$mod+Escape` / `$mod+Ctrl+l` | Lock screen |
 | `$mod+Shift+e` | Power menu (lock/logout/suspend/restart/shutdown) |
 | `$mod+F1` | Keybinding cheat-sheet |
@@ -134,7 +134,7 @@ CopyQ's window is forced floating, centered, and fixed-size (never tiles).
 (unlike GNOME/Windows) -- the titlebar is just a label. To dismiss CopyQ:
 press `$mod+Ctrl+v` again (same toggle), press `Escape` while it's focused
 (CopyQ's own default), click anywhere outside it (auto-closes after 500ms,
-`close_on_unfocus` is on by default), or `$mod+Shift+q` like any other
+`close_on_unfocus` is on by default), or `$mod+q` like any other
 window. It keeps running in the background/tray either way -- that's by
 design for a clipboard manager, not a bug.
 
@@ -157,7 +157,7 @@ design for a clipboard manager, not a bug.
 | Binding | Action |
 |---|---|
 | `$mod+b` / `$mod+v` | Split horizontally / vertically |
-| `$mod+s` / `$mod+w` | Stacking / tabbed layout |
+| `$mod+s` / `$mod+Shift+w` | Stacking / tabbed layout |
 | `$mod+e` | Toggle split layout |
 | `$mod+f` | Fullscreen |
 | `$mod+Shift+space` | Toggle floating |
@@ -166,9 +166,12 @@ design for a clipboard manager, not a bug.
 | `$mod+r` | Resize mode (then arrows/hjkl, Return/Escape to exit) |
 | `$mod+minus` / `$mod+Shift+minus` | Show/send to scratchpad |
 
-Since `$mod+w` and `$mod+e` are sway's own layout commands, the
-bspwm-inherited browser/file-manager bindings live on `$mod+Shift+w` and
-`$mod+n` instead (see table above) to avoid clobbering them.
+`$mod+q` and `$mod+w` match bspwm's un-shifted close-window/browser
+bindings directly (bspwm had no sway-style layout commands competing for
+those keys). Sway's own `layout tabbed`, which normally lives on plain
+`$mod+w`, moved to `$mod+Shift+w` instead so it's still available.
+`$mod+e` still means `layout toggle split` (sway default) since the
+file-manager binding lives on `$mod+n` and never competed for it.
 
 ## Structure
 
