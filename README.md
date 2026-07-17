@@ -57,6 +57,7 @@ re-run `--packages` if Sway ever stops appearing/launching after a driver or
 | `$mod+Shift+t` | Cycle color theme |
 | `$mod+Shift+p` | Wallpaper picker |
 | `$mod+Shift+m` | Monitor layout (wdisplays) |
+| `Scroll Lock` | Switch shared monitor's input to this machine (DDC/CI via ddcutil) |
 | `Alt+s` | Screenshot region -> save + clipboard |
 | `Print` / `$mod+Shift+s` | Screenshot full / region to clipboard |
 | `$mod+1..0` / `$mod+Shift+1..0` | Switch / move to workspace 1-10 |

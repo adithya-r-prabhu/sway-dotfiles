@@ -126,6 +126,32 @@ enable_bluetooth() {
     sudo systemctl enable --now bluetooth.service 2>/dev/null || true
 }
 
+setup_ddcutil_i2c() {
+    # ddcutil (used by the Scroll Lock keybinding to switch the shared
+    # monitor's DDC/CI input between this machine and the MacBook, see
+    # sway/.config/sway/scripts/switch-monitor-input.sh) needs the i2c-dev
+    # kernel module loaded and non-root read/write access to /dev/i2c-*.
+    if ! command -v ddcutil >/dev/null; then
+        return
+    fi
+    echo "==> Setting up i2c-dev module + permissions for ddcutil"
+    sudo modprobe i2c-dev 2>/dev/null || true
+    if ! grep -qx i2c-dev /etc/modules 2>/dev/null; then
+        echo i2c-dev | sudo tee -a /etc/modules >/dev/null
+    fi
+    sudo groupadd -f i2c
+    if ! id -nG "$USER" | grep -qw i2c; then
+        sudo usermod -aG i2c "$USER"
+        echo "    Added $USER to the i2c group -- log out and back in for this to take effect."
+    fi
+    local udev_rule='/etc/udev/rules.d/45-ddcutil-i2c.rules'
+    if [ ! -f "$udev_rule" ]; then
+        echo 'KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"' | sudo tee "$udev_rule" >/dev/null
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger
+    fi
+}
+
 cleanup_stale_nvidia_modeset() {
     # An earlier version of this script disabled nvidia-drm's modeset
     # (`options nvidia-drm modeset=0`), copied from npranav7619/dotfiles
@@ -229,6 +255,7 @@ main() {
         setup_default_apps
         setup_gtk_theme
         enable_bluetooth
+        setup_ddcutil_i2c
         cleanup_stale_nvidia_modeset
         configure_sway_session
     fi

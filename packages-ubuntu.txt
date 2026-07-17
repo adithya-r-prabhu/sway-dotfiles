@@ -2,6 +2,7 @@ brightnessctl
 blueman
 copyq
 curl
+ddcutil
 fd-find
 foot
 fzf

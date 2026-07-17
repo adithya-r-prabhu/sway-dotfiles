@@ -207,6 +207,11 @@ bindsym $mod+r mode "resize"
     bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%- && ~/.config/sway/scripts/osd.sh brightness
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+ && ~/.config/sway/scripts/osd.sh brightness
 
+    # Monitor input switch: put the HP 327pf's video input on this machine
+    # (DisplayPort). The MacBook side has its own script bound to the same
+    # key via Deskflow key-forwarding (see ~/.config/sway/scripts/switch-monitor-input.sh).
+    bindsym --locked Scroll_Lock exec ~/.config/sway/scripts/switch-monitor-input.sh
+
     # Screenshots (grim + slurp + wl-clipboard)
     bindsym Print exec mkdir -p ~/Pictures/Screenshots && grim ~/Pictures/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png
     bindsym $mod+Shift+s exec grim -g "$(slurp)" - | wl-copy
