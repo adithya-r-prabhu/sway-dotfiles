@@ -1,185 +1,88 @@
 # sway-dotfiles
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/984096a5-798a-46c5-9a7e-1b1287449425" />
 
-Minimal Sway desktop, managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Minimal Sway (Wayland) desktop for Ubuntu, managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Base setup from [npranav7619/dotfiles](https://github.com/npranav7619/dotfiles), with
+app choices/keybindings ported from this account's old X11 setup,
+[adithya-r-prabhu/bspwm](https://github.com/adithya-r-prabhu/bspwm).
 
-Base setup forked/adapted from [npranav7619/dotfiles](https://github.com/npranav7619/dotfiles)
-(Sway + Catppuccin Mocha), with app choices and extra keybindings ported from
-this account's older X11/bspwm setup,
-[adithya-r-prabhu/bspwm](https://github.com/adithya-r-prabhu/bspwm)
-(rofi/sxhkd behaviors rewritten for wofi/sway, since bspwm+rofi are X11-only
-and this is a Wayland setup).
+## What's included
 
-- **Theme:** Catppuccin Mocha / Gruvbox Dark / Nord / Dracula, cycle with `$mod+Shift+t` or the paint-brush icon in waybar.
-- **Font:** [Agave Nerd Font](https://github.com/ryanoasis/nerd-fonts).
-- **Icon theme / GTK theme:** BigSur-dark icons + Orchis-dark GTK theme (ported from adithya-r-prabhu/dotfiles' `.icons`/`.themes`), set for both GTK3 (`gtk-3.0/settings.ini`) and GTK4/libadwaita apps (`gsettings` -- see `setup_gtk_theme()` in install.sh). Alternates also included: BigSur (light), Orchis-dark-compact, Yaru-dark.
-- **Wallpapers:** Pranav's originals plus extras from adithya-r-prabhu/arch-xfce-dotfiles, all pickable via `$mod+Shift+p` or waybar's wallpaper icon.
-- **Terminals:** [kitty](https://sw.kovidgoyal.net/kitty/) (primary, `$mod+Return`) and [foot](https://codeberg.org/dnkl/foot) (secondary/lightweight, `$mod+Shift+Return`).
-- **Browser:** Microsoft Edge (`$mod+w`, assigned to workspace 2).
-- **File manager:** Nautilus (`$mod+n`).
-- **Other apps:** sway (compositor), waybar (bar), mako (notifications), wofi (launcher), swaylock (lock screen), blueman (Bluetooth), CopyQ (clipboard history), fastfetch, neovim, tmux, htop.
+- **Theme:** Catppuccin Mocha / Gruvbox / Nord / Dracula -- cycle with `$mod+Shift+t`
+- **Icons/GTK theme:** BigSur-dark + Orchis-dark (alternates: BigSur, Orchis-dark-compact, Yaru-dark)
+- **Wallpapers:** picker via `$mod+Shift+p`
+- **Terminals:** kitty (`$mod+Return`), foot (`$mod+Shift+Return`)
+- **Browser:** Microsoft Edge (`$mod+w`) · **Files:** Nautilus (`$mod+n`)
+- **Clipboard history:** CopyQ (`$mod+Ctrl+v`) · **Bluetooth:** blueman (`$mod+Shift+b`)
+- **Screenshots:** grim+slurp (`Alt+s` region+save+clipboard, `Print` full, `$mod+Shift+s` region-to-clipboard)
+- waybar, mako, wofi, swaylock, fastfetch, neovim, tmux, htop
 
-### Why no flameshot?
-
-flameshot is installed by neither this repo nor the bspwm one anymore -- it
-was tried and dropped. Its Qt5 GUI has no `wlr-layer-shell` support, so on
-this sway/wlroots setup it launches (no crash, no error) but renders
-**nothing visible at all** -- confirmed by screenshotting mid-launch and
-seeing an unchanged desktop. This is a known flameshot-on-wlroots limitation,
-not a config issue. `Alt+s` now runs `screenshot-region.sh`
-(grim+slurp+wl-copy+a mako notification) instead -- same core
-"select a region, save it, copy it" behavior, fully Wayland-native and
-already proven to work reliably here.
-
-### Why no nitrogen?
-
-[nitrogen](https://github.com/l3ib/nitrogen) (used for wallpapers in the old
-X11 `bspwm` setup) is an **X11-only** tool -- it fundamentally cannot run on
-Wayland/Sway. Its job here is done natively instead by `swaybg` (sets the
-wallpaper, started automatically by sway's `output * bg ...` config line)
-plus the wofi-based `wallpaper-picker.sh` (lets you pick one interactively
-and persists the choice to the sway config) -- same end result, Wayland-native
-tooling. Same story for anything else from the old X11 setups that doesn't
-appear here (`picom`, `nitrogen`, `polybar`, `rofi`, `dunst`, `sxhkd`): they're
-all X11-specific and have Wayland-native equivalents already in this repo
-(sway's own compositing, swaybg, waybar, wofi, mako, sway's `bindsym`).
-
-## Usage
+## Install
 
 ```
 git clone https://github.com/adithya-r-prabhu/sway-dotfiles.git ~/dotfiles
 cd ~/dotfiles
-./install.sh
+./install.sh              # font + stow configs only
+./install.sh --packages    # + apt packages, Edge repo, default apps, GTK theme,
+                           #   Bluetooth, and NVIDIA/GDM fixes (see below)
 ```
 
-This installs the Agave Nerd Font (if not already present) and symlinks each
-package's config into `~/.config` via `stow`. Any pre-existing real config
-files get moved to `~/.config-backup-<timestamp>/` first, so nothing is lost.
+Pre-existing real configs get backed up to `~/.config-backup-<timestamp>/` first.
 
-To also install the full package list (sway ecosystem, kitty/foot, Nautilus,
-CopyQ, fastfetch, dev tools), add the Microsoft Edge apt repo, set
-default apps (browser/file manager), and apply the hybrid-NVIDIA fix if
-needed:
-
-```
-./install.sh --packages
-```
-
-### NVIDIA machines: Sway missing from the login screen, or won't start
-
-On a machine with the proprietary NVIDIA driver, two separate problems show up:
-
-1. **"Sway" doesn't appear as a session option at all** (behind GDM's
-   gear/settings icon). Ubuntu's GDM has a udev rule
-   (`/usr/lib/udev/rules.d/61-gdm.rules`) that disables Wayland *entirely*
-   whenever `nvidia-drm`'s `modeset` parameter is off -- **except** on
-   detected hybrid-GPU *laptops*, which it leaves alone. On a desktop (no
-   internal panel), disabling modeset -- e.g. via the common
-   `options nvidia-drm modeset=0` fix for hybrid-laptop black-screen-at-boot
-   issues -- backfires and hides every Wayland session. `./install.sh
-   --packages` removes any such stale modeset override
-   (`cleanup_stale_nvidia_modeset`) so GDM keeps Wayland/Sway listed
-   (**takes effect on next reboot**).
-2. **Sway exits immediately with `Proprietary Nvidia drivers are NOT
-   supported`** if you do select it. This check is independent of modeset --
-   it fires whenever any proprietary NVIDIA driver is loaded at all. The fix
-   is the `--unsupported-gpu` flag, which `./install.sh --packages` bakes
-   into `/usr/share/wayland-sessions/sway.desktop`'s `Exec=` line
-   (`configure_sway_session`). Note that file isn't a tracked dpkg conffile,
-   so a future `sway` package upgrade can silently reset it -- re-run
-   `./install.sh --packages` if Sway stops launching after an update.
+**On an NVIDIA machine**, `--packages` also fixes two Sway/GDM issues: Wayland
+sessions missing entirely from the GDM login screen, and Sway refusing to
+start on proprietary NVIDIA drivers. See comments in `install.sh`
+(`cleanup_stale_nvidia_modeset`, `configure_sway_session`) for details --
+re-run `--packages` if Sway ever stops appearing/launching after a driver or
+`sway` package update.
 
 ## Keybindings
 
-`$mod` = Super/Windows key. Full source of truth is
-`sway/.config/sway/config` (also viewable live with `$mod+F1`).
+`$mod` = Super key. Full source of truth: `sway/.config/sway/config`, or view live with `$mod+F1`.
 
-**Apps / basics**
 | Binding | Action |
 |---|---|
-| `$mod+Return` | Open kitty (terminal) |
-| `$mod+Shift+Return` | Open foot (lightweight secondary terminal) |
-| `$mod+d` | App launcher (wofi) |
-| `$mod+w` | Open Microsoft Edge |
-| `$mod+n` | Open Nautilus (file manager) |
-| `$mod+q` / `$mod+Shift+q` | Close focused window |
-| `$mod+l` / `$mod+Escape` / `$mod+Ctrl+l` | Lock screen |
-| `$mod+Shift+e` | Power menu (lock/logout/suspend/restart/shutdown) |
+| `$mod+Return` / `$mod+Shift+Return` | Terminal: kitty / foot |
+| `$mod+d` | App launcher |
+| `$mod+w` | Browser (Edge) |
+| `$mod+n` | File manager (Nautilus) |
+| `$mod+q` | Close window |
+| `$mod+l` | Lock screen |
+| `$mod+Shift+e` | Power menu |
+| `$mod+Ctrl+e` | Emoji picker |
+| `$mod+Ctrl+v` | Clipboard history (CopyQ) |
 | `$mod+F1` | Keybinding cheat-sheet |
-| `$mod+Ctrl+e` | Emoji picker (copies to clipboard) |
-| `$mod+Shift+c` | Reload sway config |
-
-**"Connecting" (network / Bluetooth) -- new**
-| Binding | Action |
-|---|---|
-| `$mod+Shift+n` | Network menu: Wi-Fi scan/connect/disconnect, ethernet toggle |
-| `$mod+Shift+b` | Bluetooth manager (blueman-manager: pair/connect/trust devices) |
-
-**Look & feel -- new**
-| Binding | Action |
-|---|---|
-| `$mod+Shift+t` | Cycle color theme (Catppuccin/Gruvbox/Nord/Dracula) |
-| `$mod+Shift+p` | Wallpaper picker (thumbnails from `wallpapers/`) |
-| `$mod+Shift+m` | Monitor layout tool (wdisplays) |
-
-**Clipboard & screenshots**
-| Binding | Action |
-|---|---|
-| `$mod+Ctrl+v` | Clipboard history (CopyQ, toggle show/hide) -- new |
-| `Alt+s` | Screenshot a region, save to `~/Pictures/Screenshots/` + copy to clipboard (grim+slurp) -- new, replaces flameshot |
-| `Print` | Full screenshot to `~/Pictures/Screenshots/` |
-| `$mod+Shift+s` | Screenshot a selected region straight to clipboard only (grim+slurp) |
-
-CopyQ's window is forced floating, centered, and fixed-size (never tiles).
-**sway does not draw clickable close/minimize buttons on any window**
-(unlike GNOME/Windows) -- the titlebar is just a label. To dismiss CopyQ:
-press `$mod+Ctrl+v` again (same toggle), press `Escape` while it's focused
-(CopyQ's own default), click anywhere outside it (auto-closes after 500ms,
-`close_on_unfocus` is on by default), or `$mod+q` like any other
-window. It keeps running in the background/tray either way -- that's by
-design for a clipboard manager, not a bug.
-
-**Media / brightness keys** (all show a mako popup now -- new)
-| Binding | Action |
-|---|---|
-| `XF86AudioRaiseVolume` / `LowerVolume` / `Mute` | Volume up/down/mute |
-| `XF86AudioMicMute` | Mic mute toggle |
-| `XF86MonBrightnessUp` / `Down` | Brightness up/down |
-
-**Moving around** (vim-style `h/j/k/l` = left/down/up/right, plus arrow keys)
-| Binding | Action |
-|---|---|
-| `$mod+h/j/k/l` or arrows | Move focus |
-| `$mod+Shift+h/j/k/l` or `Shift+`arrows | Move focused window |
-| `$mod+1`..`$mod+0` | Switch to workspace 1-10 |
-| `$mod+Shift+1`..`0` | Move window to workspace 1-10 |
-
-**Layout**
-| Binding | Action |
-|---|---|
-| `$mod+b` / `$mod+v` | Split horizontally / vertically |
-| `$mod+s` / `$mod+Shift+w` | Stacking / tabbed layout |
+| `$mod+Shift+n` | Network menu (Wi-Fi/ethernet) |
+| `$mod+Shift+b` | Bluetooth manager |
+| `$mod+Shift+t` | Cycle color theme |
+| `$mod+Shift+p` | Wallpaper picker |
+| `$mod+Shift+m` | Monitor layout (wdisplays) |
+| `Alt+s` | Screenshot region -> save + clipboard |
+| `Print` / `$mod+Shift+s` | Screenshot full / region to clipboard |
+| `$mod+1..0` / `$mod+Shift+1..0` | Switch / move to workspace 1-10 |
+| `$mod+hjkl` or arrows | Move focus (`Shift+` to move window) |
+| `$mod+b` / `v` / `s` / `Shift+w` | Split horiz/vert, stacking, tabbed layout |
 | `$mod+e` | Toggle split layout |
 | `$mod+f` | Fullscreen |
-| `$mod+Shift+space` | Toggle floating |
-| `$mod+space` | Toggle focus between tiling/floating |
-| `$mod+a` | Focus parent container |
-| `$mod+r` | Resize mode (then arrows/hjkl, Return/Escape to exit) |
-| `$mod+minus` / `$mod+Shift+minus` | Show/send to scratchpad |
+| `$mod+Shift+space` / `$mod+space` | Toggle floating / focus tiling-floating |
+| `$mod+r` | Resize mode |
+| `$mod+Shift+c` | Reload config |
 
-`$mod+q` and `$mod+w` match bspwm's un-shifted close-window/browser
-bindings directly (bspwm had no sway-style layout commands competing for
-those keys). Sway's own `layout tabbed`, which normally lives on plain
-`$mod+w`, moved to `$mod+Shift+w` instead so it's still available.
-`$mod+e` still means `layout toggle split` (sway default) since the
-file-manager binding lives on `$mod+n` and never competed for it.
+CopyQ and any floating window has no clickable close button (sway doesn't
+draw one) -- dismiss with `Escape`, the same shortcut that opened it, or `$mod+q`.
 
 ## Structure
 
 Each top-level directory is a stow package mirroring `$HOME`, e.g.
-`kitty/.config/kitty/kitty.conf` links to `~/.config/kitty/kitty.conf`. To
-(re)link a single package by hand: `stow -v -t ~ kitty`.
+`kitty/.config/kitty/kitty.conf` links to `~/.config/kitty/kitty.conf`.
+Relink one package by hand: `stow -v -t ~ kitty`.
 
-## Wallpaper
+## Notes
 
-Original wallpaper credits [walls-catppuccin-mocha](https://github.com/orangci/walls-catppuccin-mocha) (via npranav7619/dotfiles).
+- **No nitrogen/picom/polybar/rofi/dunst/sxhkd** (from the old X11 bspwm
+  setup): all X11-only, replaced here by their Wayland-native equivalents
+  already in this repo (swaybg+wallpaper-picker, sway compositing, waybar,
+  wofi, mako, sway `bindsym`).
+- **No flameshot**: its Qt5 GUI doesn't render at all under Sway (no
+  `wlr-layer-shell` support) -- replaced by the `Alt+s` grim+slurp script.
+- Wallpaper credit: [walls-catppuccin-mocha](https://github.com/orangci/walls-catppuccin-mocha).
