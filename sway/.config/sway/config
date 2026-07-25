@@ -223,6 +223,9 @@ include /etc/sway/config.d/*
 # (browser -> a dedicated workspace, calculator/screenshot tool floating).
 assign [app_id="microsoft-edge"] workspace number 2
 for_window [app_id="gnome-calculator"] floating enable
+# Video picture-in-picture windows are small, independent windows in Edge,
+# FreeTube, and most players. Keep them floating across all workspaces.
+for_window [title="(?i).*picture[- ]?in[- ]?picture.*"] floating enable, sticky enable
 # CopyQ: always floating (never tiles like a regular window), fixed size,
 # centered, and given a normal titlebar+close-button -- unlike the rest of
 # this theme's borderless "pixel" style windows, since this is meant to be
